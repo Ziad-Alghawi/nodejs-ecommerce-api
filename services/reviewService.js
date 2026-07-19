@@ -1,8 +1,15 @@
-//import asyncHandler from "express-async-handler";
-
 import * as factory from "./handlersFactory.js";
 
 import Review from "../models/reviewModel.js";
+
+// Nested Route for (Get Reviews)
+// Get /api/v1/products/:productId/reviews
+export const createFilterObject = (req, res, next) => {
+  let filterObj = {};
+  if (req.params.productId) filterObj = { product: req.params.productId };
+  req.filterObj = filterObj;
+  next();
+};
 
 // @desc Get list of reviews
 // @route GET /api/v1/reviews
@@ -20,6 +27,13 @@ export const getReview = factory.getOne(Review);
 //   if (!req.body.user) req.body.user = req.user._id;
 //   next();
 // };
+
+// Nested Route for (Create Review)
+export const setProductIdAndUserIdToBody = (req, res, next) => {
+  if (!req.body.product) req.body.product = req.params.productId;
+  if (!req.body.user) req.body.user = req.user._id;
+  next();
+};
 
 // @desc Create a new review
 // @route POST /api/v1/reviews

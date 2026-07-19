@@ -17,7 +17,15 @@ import {
   resizeProductImages,
 } from "../services/productService.js";
 
+import reviewRoute from "./reviewRoute.js";
+
 const router = express.Router();
+
+// Nested route for reviews
+// Post /products/ekfsdkl/reviews
+// Get  /products/ekfsdkl/reviews
+// Get  /products/ekfsdkl/reviews/ekfsdklfj>> get specific review for specific product
+router.use("/:productId/reviews", reviewRoute);
 
 // @desc Get list of products
 // @route GET /api/v1/products

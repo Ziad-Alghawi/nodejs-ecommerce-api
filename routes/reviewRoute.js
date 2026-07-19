@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   createReviewValidator,
   getReviewValidator,
@@ -13,17 +12,25 @@ import {
   getReview,
   updateReview,
   deleteReview,
+  createFilterObject,
+  setProductIdAndUserIdToBody,
 } from "../services/reviewService.js";
 
 import { protect, allowedTo } from "../services/authService.js";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true }); // mergeParams to access params from parent route (productId)
 
 // http://localhost:8000/api/v1/reviews
 router
   .route("/")
-  .get(getReviews)
-  .post(protect, allowedTo("user"), createReviewValidator, createReview);
+  .get(createFilterObject, getReviews)
+  .post(
+    protect,
+    allowedTo("user"),
+    setProductIdAndUserIdToBody,
+    createReviewValidator,
+    createReview,
+  );
 router
   .route("/:id")
   .get(getReviewValidator, getReview)

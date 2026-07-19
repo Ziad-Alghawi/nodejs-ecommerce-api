@@ -22,6 +22,7 @@ import subcategoriesRoute from "./subCategoryRoute.js";
 
 const router = express.Router();
 
+// Nested route for subcategories
 router.use("/:categoryId/subcategories", subcategoriesRoute);
 
 // http://localhost:8000/api/v1/categories
