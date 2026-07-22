@@ -22,16 +22,12 @@ export const getReviews = factory.getAll(Review);
 
 export const getReview = factory.getOne(Review);
 
-// export const setUserIdAndProductIdToBody = (req, res, next) => {
-//   if (!req.body.product) req.body.product = req.params.productId;
-//   if (!req.body.user) req.body.user = req.user._id;
-//   next();
-// };
-
 // Nested Route for (Create Review)
+// Set the logged-in user as the review owner
 export const setProductIdAndUserIdToBody = (req, res, next) => {
   if (!req.body.product) req.body.product = req.params.productId;
-  if (!req.body.user) req.body.user = req.user._id;
+  // Set the user ID to the logged-in user's ID
+  req.body.user = req.user._id;
   next();
 };
 
@@ -39,6 +35,12 @@ export const setProductIdAndUserIdToBody = (req, res, next) => {
 // @route POST /api/v1/reviews
 // @access Private/Protect/User
 export const createReview = factory.createOne(Review);
+
+// Ignore any user field sent by the client and use the authenticated user instead
+export const removeUserFromBody = (req, res, next) => {
+  delete req.body.user;
+  next();
+};
 
 //@desc  update a specific review by id
 // @route PUT /api/v1/reviews/:id
