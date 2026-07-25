@@ -1,6 +1,5 @@
 import asyncHandler from "express-async-handler";
 
-//import ApiError from "../utils/apiError.js";
 import User from "../models/userModel.js";
 
 // @desc Add a product to wishlist

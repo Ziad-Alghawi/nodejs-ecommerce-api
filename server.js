@@ -16,6 +16,7 @@ import userRoute from "./routes/userRoute.js";
 import authRoute from "./routes/authRoute.js";
 import reviewRoute from "./routes/reviewRoute.js";
 import wishlistRoute from "./routes/wishlistRoute.js";
+import addressRoute from "./routes/addressRoute.js";
 
 const __dirname = path.resolve();
 
@@ -45,6 +46,7 @@ app.use("/api/v1/users", userRoute);
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/reviews", reviewRoute);
 app.use("/api/v1/wishlist", wishlistRoute);
+app.use("/api/v1/addresses", addressRoute);
 
 // Handle unhandled routes
 app.all("/*splat", (req, res, next) => {
