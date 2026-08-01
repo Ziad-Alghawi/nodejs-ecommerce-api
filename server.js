@@ -7,17 +7,8 @@ import morgan from "morgan";
 import ApiError from "./utils/apiError.js";
 import globalError from "./middlewares/errorMiddleware.js";
 import dbConnection from "./config/database.js";
-// Routes
-import categoryRoute from "./routes/categoryRoute.js";
-import subCategoryRoute from "./routes/subCategoryRoute.js";
-import brandRoute from "./routes/brandRoute.js";
-import productRoute from "./routes/productRoute.js";
-import userRoute from "./routes/userRoute.js";
-import authRoute from "./routes/authRoute.js";
-import reviewRoute from "./routes/reviewRoute.js";
-import wishlistRoute from "./routes/wishlistRoute.js";
-import addressRoute from "./routes/addressRoute.js";
-import couponRoute from "./routes/couponRoute.js";
+// // Routes
+import mountRoutes from "./routes/index.js";
 
 const __dirname = path.resolve();
 
@@ -38,17 +29,8 @@ if (process.env.NODE_ENV === "development") {
   console.log(`node: ${process.env.NODE_ENV}`);
 }
 
-// mount Routes
-app.use("/api/v1/categories", categoryRoute);
-app.use("/api/v1/subCategories", subCategoryRoute);
-app.use("/api/v1/brands", brandRoute);
-app.use("/api/v1/products", productRoute);
-app.use("/api/v1/users", userRoute);
-app.use("/api/v1/auth", authRoute);
-app.use("/api/v1/reviews", reviewRoute);
-app.use("/api/v1/wishlist", wishlistRoute);
-app.use("/api/v1/addresses", addressRoute);
-app.use("/api/v1/coupons", couponRoute);
+// // mount Routes
+mountRoutes(app);
 
 // Handle unhandled routes
 app.all("/*splat", (req, res, next) => {
