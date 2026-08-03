@@ -37,11 +37,17 @@ export const createOne = (Model) =>
     res.status(201).json({ data: newDoc });
   });
 
-export const getOne = (Model, populationOpt) =>
+export const getOne = (Model, populationOpt, filterFn) =>
   asyncHandler(async (req, res, next) => {
     const { id } = req.params;
-    // 1- Build query
-    const query = Model.findById(id);
+
+    // Add extra query conditions if provided
+    const filter = filterFn ? filterFn(req) : {};
+
+    const query = Model.findOne({
+      _id: id,
+      ...filter,
+    });
     if (populationOpt) {
       query.populate(populationOpt);
     }
