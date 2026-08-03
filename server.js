@@ -1,24 +1,32 @@
+import "./config.js";
 import path from "path";
 
 import express from "express";
-import dotenv from "dotenv";
 import morgan from "morgan";
+import cors from "cors";
+import compression from "compression";
 
 import ApiError from "./utils/apiError.js";
 import globalError from "./middlewares/errorMiddleware.js";
 import dbConnection from "./config/database.js";
+
 // // Routes
 import mountRoutes from "./routes/index.js";
 
 const __dirname = path.resolve();
 
-dotenv.config({ path: "config.env" });
-
 // Connect to database
 dbConnection();
 
 const app = express();
-app.set("query parser", "extended");
+
+// Enable other domains to access your API
+app.use(cors());
+app.options("/*splat", cors());
+
+app.use(compression()); //Compress all routes
+
+app.set("query parser", "extended"); // to allow nested query parameters
 
 // Middleware
 app.use(express.json());

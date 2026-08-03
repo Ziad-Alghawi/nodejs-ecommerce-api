@@ -7,40 +7,32 @@ import {
   filterOrderForLoggedUser,
   updateOrderToPaid,
   updateOrderToDelivered,
+  checkoutSession,
 } from "../services/orderService.js";
 
 import { protect, allowedTo } from "../services/authService.js";
 
 const router = express.Router();
 
-router.use(protect); // Protect all routes
-// http://localhost:8000/api/v1/brands
-router.route("/:cartId").post(createCashOrder);
+// Protect all routes
+router.use(protect);
+
+router.get("/checkout-session/:cartId", allowedTo("user"), checkoutSession);
+
+router.route("/:cartId").post(allowedTo("user"), createCashOrder);
 
 router.get(
   "/",
-  protect,
   allowedTo("user", "admin", "manager"),
   filterOrderForLoggedUser,
   findAllOrders,
 );
 
-router.get(
-  "/:id",
-  protect,
-  allowedTo("user", "admin", "manager"),
-  findSpecificOrder,
-);
+router.get("/:id", allowedTo("user", "admin", "manager"), findSpecificOrder);
 
-router.put(
-  "/:id/pay",
-  protect,
-  allowedTo("admin", "manager"),
-  updateOrderToPaid,
-);
+router.put("/:id/pay", allowedTo("admin", "manager"), updateOrderToPaid);
 router.put(
   "/:id/deliver",
-  protect,
   allowedTo("admin", "manager"),
   updateOrderToDelivered,
 );

@@ -1,3 +1,4 @@
+import Stripe from "stripe";
 import asyncHandler from "express-async-handler";
 import * as factory from "./handlersFactory.js";
 import ApiError from "../utils/apiError.js";
@@ -5,6 +6,9 @@ import ApiError from "../utils/apiError.js";
 import Order from "../models/orderModel.js";
 import Cart from "../models/cartModel.js";
 import Product from "../models/productModel.js";
+
+// Init stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET);
 
 // @desc   Create Cash Order
 // @route  POST /api/v1/orders/cartId
@@ -116,4 +120,54 @@ export const updateOrderToDelivered = asyncHandler(async (req, res, next) => {
   const updatedOrder = await order.save();
 
   res.status(200).json({ status: "success", data: updatedOrder });
+});
+
+// @desc   Get Checkout Session from Stripe and send it as response to client
+// @route  GET /api/v1/orders/checkout-session/cartId
+// @access Private/User
+export const checkoutSession = asyncHandler(async (req, res, next) => {
+  console.log(req.body);
+  // app settings
+  const taxPrice = 0;
+  const shippingPrice = 0;
+
+  // 1- Get cart based on cartId
+  const cart = await Cart.findById(req.params.cartId);
+  if (!cart) {
+    return next(
+      new ApiError(`No cart found with this id: ${req.params.cartId}`, 404),
+    );
+  }
+
+  // 2- Get order price based on cart price (check if coupon applied)
+  const cartPrice = cart.totalPriceAfterDiscount
+    ? cart.totalPriceAfterDiscount
+    : cart.totalCartPrice;
+
+  const totalOrderPrice = cartPrice + taxPrice + shippingPrice;
+
+  // 3- Create stripe checkout session
+  const session = await stripe.checkout.sessions.create({
+    line_items: [
+      {
+        price_data: {
+          currency: "eur",
+          product_data: {
+            name: req.user.name,
+          },
+          unit_amount: totalOrderPrice * 100,
+        },
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    success_url: `${req.protocol}://${req.get("host")}/orders`,
+    cancel_url: `${req.protocol}://${req.get("host")}/cart`,
+    customer_email: req.user.email,
+    client_reference_id: req.params.cartId,
+    metadata: req.body ? req.body.shippingAddress : {},
+  });
+
+  // 4- Send session as response
+  res.status(200).json({ status: "success", session });
 });
