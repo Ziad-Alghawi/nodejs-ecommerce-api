@@ -9,7 +9,7 @@ import compression from "compression";
 import ApiError from "./utils/apiError.js";
 import globalError from "./middlewares/errorMiddleware.js";
 import dbConnection from "./config/database.js";
-
+import { webhookCheckout } from "./services/orderService.js";
 // // Routes
 import mountRoutes from "./routes/index.js";
 
@@ -25,6 +25,13 @@ app.use(cors());
 app.options("/*splat", cors());
 
 app.use(compression()); //Compress all routes
+
+// Checkout webhook
+app.post(
+  "/webhook-checkout",
+  express.raw({ type: "application/json" }),
+  webhookCheckout,
+);
 
 app.set("query parser", "extended"); // to allow nested query parameters
 
