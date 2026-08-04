@@ -233,7 +233,7 @@ export const webhookCheckout = asyncHandler(async (req, res, next) => {
     // console.log(event.data.object.client_reference_id);
 
     // create order
-    createOnlineOrder(event.data.object);
+    await createOnlineOrder(event.data.object);
   }
   res.status(200).json({ received: true });
 });
