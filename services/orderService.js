@@ -178,11 +178,16 @@ export const checkoutSession = asyncHandler(async (req, res, next) => {
 // @access Private/User
 const createOnlineOrder = async (session) => {
   const cartId = session.client_reference_id;
+  console.log("1", session.client_reference_id);
+
   const shippingAddress = session.metadata;
   const orderPrice = session.amount_total / 100;
 
   const cart = await Cart.findById(cartId);
+  console.log("2", cart);
+
   const user = await User.findOne({ email: session.customer_email });
+  console.log("3", user);
 
   // 3- Create order with default payment method (Card/online)
   const order = await Order.create({
@@ -233,7 +238,11 @@ export const webhookCheckout = asyncHandler(async (req, res, next) => {
     // console.log(event.data.object.client_reference_id);
 
     // create order
-    await createOnlineOrder(event.data.object);
+    try {
+      await createOnlineOrder(event.data.object);
+    } catch (err) {
+      console.error(err);
+    }
   }
   res.status(200).json({ received: true });
 });
