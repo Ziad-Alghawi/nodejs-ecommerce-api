@@ -6,6 +6,7 @@ import ApiError from "../utils/apiError.js";
 import Order from "../models/orderModel.js";
 import Cart from "../models/cartModel.js";
 import Product from "../models/productModel.js";
+import User from "../models/userModel.js";
 
 // Init stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET);
@@ -172,6 +173,44 @@ export const checkoutSession = asyncHandler(async (req, res, next) => {
   res.status(200).json({ status: "success", session });
 });
 
+// @desc   Create order after checkout with stripe
+// @route  POST /api/v1/orders/webhook-checkout
+// @access Private/User
+const createOnlineOrder = async (session) => {
+  const cartId = session.client_reference_id;
+  const shippingAddress = session.metadata;
+  const orderPrice = session.display_items[0].amount / 100;
+
+  const cart = await Cart.findById(cartId);
+  const user = await User.findOne({ email: session.customer_email });
+
+  // 3- Create order with default payment method (Card/online)
+  const order = await Order.create({
+    user: user._id,
+    cartItems: cart.cartItems,
+    shippingAddress,
+    totalOrderPrice: orderPrice,
+    isPaid: true,
+    paidAt: Date.now(),
+    paymentMethodType: "Card",
+  });
+
+  // 4- After creating order,>> a(decrement product quantity), b(increment product sold)
+  if (order) {
+    const bulkOption = cart.cartItems.map((item) => ({
+      updateOne: {
+        filter: { _id: item.product },
+        update: { $inc: { quantity: -item.quantity, sold: +item.quantity } },
+      },
+    }));
+    await Product.bulkWrite(bulkOption, {});
+  }
+
+  // 5- Clear cart based on cartId
+  await Cart.findByIdAndDelete(cartId);
+};
+
+// @desc  webhookCheckout
 export const webhookCheckout = asyncHandler(async (req, res, next) => {
   const sig = req.headers["stripe-signature"];
   let event;
@@ -187,8 +226,12 @@ export const webhookCheckout = asyncHandler(async (req, res, next) => {
   }
 
   if (event.type === "checkout.session.completed") {
-    console.log("Create order Here.....");
-    console.log(event.data.object.client_reference_id);
+    // these comments to test the webhook (postman + stripe)
+    // console.log("Create order Here.....");
+    // console.log(event.data.object.client_reference_id);
+
+    // create order
+    createOnlineOrder(event.data.object);
   }
   res.status(200).json({ received: true });
 });
