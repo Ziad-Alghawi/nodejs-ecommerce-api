@@ -20,11 +20,10 @@ class ApiFeatures {
 
   sort() {
     if (this.queryString.sort) {
-      // price, -sold => [price, -sold] => "price -sold"
       const sortBy = this.queryString.sort.split(",").join(" ");
       this.mongooseQuery = this.mongooseQuery.sort(sortBy);
     } else {
-      this.mongooseQuery = this.mongooseQuery.sort("-createdAt");
+      this.mongooseQuery = this.mongooseQuery.sort("-createAt");
     }
     return this;
   }

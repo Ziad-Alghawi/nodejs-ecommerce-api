@@ -6,6 +6,7 @@ import asyncHandler from "express-async-handler";
 import ApiError from "../utils/apiError.js";
 import sendEmail from "../utils/sendEmail.js";
 import createToken from "../utils/createToken.js";
+import { sanitizeUser } from "../utils/sanatizeData.js";
 
 import User from "../models/userModel.js";
 
@@ -23,7 +24,7 @@ export const signup = asyncHandler(async (req, res) => {
   // 2- Generate token
   const token = createToken(user._id);
 
-  res.status(201).json({ data: user, token });
+  res.status(201).json({ data: sanitizeUser(user), token });
 });
 
 // @desc Login a user
@@ -40,7 +41,7 @@ export const login = asyncHandler(async (req, res, next) => {
   const token = createToken(user._id);
 
   // 4- send response to client side
-  res.status(200).json({ data: user, token });
+  res.status(200).json({ data: sanitizeUser(user), token });
 });
 
 // @desc Make sure the user is logged in and protect the route

@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import asyncHandler from "express-async-handler";
 import * as factory from "./handlersFactory.js";
 import ApiError from "../utils/apiError.js";
+import { sanitizeOrder } from "../utils/sanatizeData.js";
 
 import Order from "../models/orderModel.js";
 import Cart from "../models/cartModel.js";
@@ -55,7 +56,7 @@ export const createCashOrder = asyncHandler(async (req, res, next) => {
     await Cart.findByIdAndDelete(req.params.cartId);
   }
 
-  res.status(201).json({ status: "success", data: order });
+  res.status(201).json({ status: "success", data: sanitizeOrder(order) });
 });
 
 // @desc   Filter Get all orders for logged user
@@ -100,7 +101,9 @@ export const updateOrderToPaid = asyncHandler(async (req, res, next) => {
 
   const updatedOrder = await order.save();
 
-  res.status(200).json({ status: "success", data: updatedOrder });
+  res
+    .status(200)
+    .json({ status: "success", data: sanitizeOrder(updatedOrder) });
 });
 
 // @desc   Update order delivered status to delivered
@@ -120,7 +123,9 @@ export const updateOrderToDelivered = asyncHandler(async (req, res, next) => {
 
   const updatedOrder = await order.save();
 
-  res.status(200).json({ status: "success", data: updatedOrder });
+  res
+    .status(200)
+    .json({ status: "success", data: sanitizeOrder(updatedOrder) });
 });
 
 // @desc   Get Checkout Session from Stripe and send it as response to client

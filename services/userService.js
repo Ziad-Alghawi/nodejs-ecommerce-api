@@ -7,6 +7,7 @@ import * as factory from "./handlersFactory.js";
 import ApiError from "../utils/apiError.js";
 import { uploadSingleImage } from "../middlewares/uploadImageMiddleware.js";
 import createToken from "../utils/createToken.js";
+import { sanitizeUser } from "../utils/sanatizeData.js";
 
 import User from "../models/userModel.js";
 
@@ -68,7 +69,7 @@ export const updateUser = asyncHandler(async (req, res, next) => {
   if (!document) {
     return next(new ApiError(`No document for this id ${req.params.id} `, 404));
   }
-  res.status(200).json({ data: document });
+  res.status(200).json({ data: sanitizeUser(document) });
 });
 
 export const changeUserPassword = asyncHandler(async (req, res, next) => {
@@ -86,7 +87,7 @@ export const changeUserPassword = asyncHandler(async (req, res, next) => {
   if (!document) {
     return next(new ApiError(`No document for this id ${req.params.id} `, 404));
   }
-  res.status(200).json({ data: document });
+  res.status(200).json({ data: sanitizeUser(document) });
 });
 
 //@desc  Delete a specific user by id
@@ -120,7 +121,7 @@ export const updateLoggedUserPassword = asyncHandler(async (req, res, next) => {
   // 2- Create token
   const token = createToken(user._id);
 
-  res.status(200).json({ data: user, token });
+  res.status(200).json({ data: sanitizeUser(user), token });
 });
 
 //@desc Update Logged user data (without password, role)
@@ -136,7 +137,7 @@ export const updateLoggedUserData = asyncHandler(async (req, res, next) => {
     },
     { new: true },
   );
-  res.status(200).json({ data: updatedUser });
+  res.status(200).json({ data: sanitizeUser(updatedUser) });
 });
 
 //@desc Deactivate Logged user
