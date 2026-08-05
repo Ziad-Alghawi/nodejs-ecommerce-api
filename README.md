@@ -19,6 +19,7 @@ The current scope includes authentication, role-based access control, catalog ma
 - [Request Lifecycle](#request-lifecycle)
 - [API Modules](#api-modules)
 - [Sample API Calls](#sample-api-calls)
+- [Postman Collection](#postman-collection)
 - [Authentication and Security](#authentication-and-security)
 - [Validation and Error Handling](#validation-and-error-handling)
 - [Database Design](#database-design)
@@ -137,6 +138,7 @@ Recommended additional badges for GitHub (optional):
 |   |-- cartRoute.js
 |   |-- categoryRoute.js
 |   |-- couponRoute.js
+|   |-- index.js
 |   |-- orderRoute.js
 |   |-- productRoute.js
 |   |-- reviewRoute.js
@@ -157,6 +159,8 @@ Recommended additional badges for GitHub (optional):
 |   |-- subCategoryService.js
 |   |-- userService.js
 |   `-- wishlistService.js
+|-- postman/
+|   `-- ecommerce-api.postman_collection.json
 |-- uploads/
 |   |-- brands/
 |   |-- categories/
@@ -166,6 +170,7 @@ Recommended additional badges for GitHub (optional):
 |   |-- apiError.js
 |   |-- apiFeatures.js
 |   |-- createToken.js
+|   |-- sanitizeData.js
 |   |-- sendEmail.js
 |   |-- dummyData/
 |   |   |-- products.json
@@ -178,7 +183,11 @@ Recommended additional badges for GitHub (optional):
 |       |-- reviewValidator.js
 |       |-- subCategoryValidator.js
 |       `-- userValidator.js
+|-- .eslintrc.json
+|-- .gitignore
+|-- config.js
 |-- config.env
+|-- package-lock.json
 |-- package.json
 `-- server.js
 ```
@@ -225,6 +234,18 @@ Base URL: `http://localhost:8000/api/v1`
 | Coupons        | `/coupons`       |
 | Cart           | `/cart`          |
 | Orders         | `/orders`        |
+
+- Authentication: signup/login, forgot-password flow, reset-code verification, and password reset.
+- Users: admin user CRUD and password changes, plus logged-user profile, password update, and account deactivation.
+- Categories and Subcategories: full CRUD, with nested subcategory routes under categories.
+- Brands: full CRUD with image upload and image processing.
+- Products: full CRUD with image cover/gallery uploads, query features (filtering/search/sort/pagination), and nested reviews routes.
+- Reviews: create/read/update/delete with ownership checks and one-review-per-user-per-product enforcement.
+- Wishlist: add, remove, and list wishlist items for the logged user.
+- Addresses: add, remove, and list saved addresses for the logged user.
+- Coupons: admin/manager coupon management (create, list, update, delete).
+- Cart: add items, update quantities, remove items, clear cart, and apply coupon discounts.
+- Orders and Payments: cash order creation, order retrieval and status updates, Stripe checkout session, and webhook-based online order completion.
 
 ## Sample API Calls
 
@@ -280,6 +301,18 @@ GET /api/v1/products?keyword=iphone&sort=-price&limit=5&page=1
   "data": []
 }
 ```
+
+## Postman Collection
+
+- Collection file: `postman/ecommerce-api.postman_collection.json`.
+- Includes all currently implemented API requests, grouped by module (authentication, catalog, users, reviews, wishlist, addresses, coupons, cart, orders, and checkout flow), with both public and protected endpoints.
+- Can be imported directly into Postman to run and test the API modules end-to-end.
+
+Import and use:
+
+1. In Postman, choose **Import** and select `postman/ecommerce-api.postman_collection.json`.
+2. Set collection/environment variables used by requests (for example `URL` and `JWT`) to match your local API and token.
+3. Run auth requests first to get a token, then run protected requests (the auth request tests can save `JWT` automatically).
 
 ## Authentication and Security
 

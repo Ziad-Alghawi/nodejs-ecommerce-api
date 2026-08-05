@@ -7,7 +7,7 @@ import * as factory from "./handlersFactory.js";
 import ApiError from "../utils/apiError.js";
 import { uploadSingleImage } from "../middlewares/uploadImageMiddleware.js";
 import createToken from "../utils/createToken.js";
-import { sanitizeUser } from "../utils/sanatizeData.js";
+import { sanitizeUser } from "../utils/sanitizeData.js";
 
 import User from "../models/userModel.js";
 

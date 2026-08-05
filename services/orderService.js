@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import asyncHandler from "express-async-handler";
 import * as factory from "./handlersFactory.js";
 import ApiError from "../utils/apiError.js";
-import { sanitizeOrder } from "../utils/sanatizeData.js";
+import { sanitizeOrder } from "../utils/sanitizeData.js";
 
 import Order from "../models/orderModel.js";
 import Cart from "../models/cartModel.js";

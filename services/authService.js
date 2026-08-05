@@ -6,7 +6,7 @@ import asyncHandler from "express-async-handler";
 import ApiError from "../utils/apiError.js";
 import sendEmail from "../utils/sendEmail.js";
 import createToken from "../utils/createToken.js";
-import { sanitizeUser } from "../utils/sanatizeData.js";
+import { sanitizeUser } from "../utils/sanitizeData.js";
 
 import User from "../models/userModel.js";
 
