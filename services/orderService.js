@@ -132,7 +132,6 @@ export const updateOrderToDelivered = asyncHandler(async (req, res, next) => {
 // @route  GET /api/v1/orders/checkout-session/cartId
 // @access Private/User
 export const checkoutSession = asyncHandler(async (req, res, next) => {
-  console.log(req.body);
   // app settings
   const taxPrice = 0;
   const shippingPrice = 0;
@@ -233,10 +232,6 @@ export const webhookCheckout = asyncHandler(async (req, res, next) => {
   }
 
   if (event.type === "checkout.session.completed") {
-    // these comments to test the webhook (postman + stripe)
-    // console.log("Create order Here.....");
-    // console.log(event.data.object.client_reference_id);
-
     // create order
     await createOnlineOrder(event.data.object);
   }

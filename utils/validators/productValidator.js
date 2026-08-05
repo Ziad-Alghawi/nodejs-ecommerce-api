@@ -81,24 +81,36 @@ export const createProductValidator = [
       }),
     ),
 
-  check("subCategories")
+  body("subCategories")
     .optional()
-    .isMongoId()
-    .withMessage("Invalid subcategory ID")
+    .custom((val, { req }) => {
+      req.body.subcategories = val;
+      return true;
+    }),
+
+  check("subcategories")
+    .optional()
+    .isArray()
+    .withMessage("Subcategories must be an array of IDs")
     .custom((subcategoriesIds) =>
       SubCategory.find({ _id: { $exists: true, $in: subcategoriesIds } }).then(
         (result) => {
           // check the length result equal subcategories in body
           if (result.length < 1 || result.length !== subcategoriesIds.length) {
-            return Promise.reject(new Error(`Invalid subcategories IDs}`));
+            return Promise.reject(new Error("Invalid subcategories IDs"));
           }
         },
       ),
     )
+    .custom((val) => {
+      if (new Set(val).size !== val.length) {
+        return Promise.reject(new Error("Subcategories must not contain duplicates"));
+      }
+      return true;
+    })
     .custom((val, { req }) =>
       SubCategory.find({ category: req.body.category }).then(
         (subcategories) => {
-          //console.log(subcategories);
           const subCategoriesIdsInDB = [];
           subcategories.forEach((subCategory) => {
             subCategoriesIdsInDB.push(subCategory._id.toString());
@@ -113,6 +125,11 @@ export const createProductValidator = [
         },
       ),
     ),
+
+  check("subcategories.*")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid subcategory ID"),
 
   check("brand").optional().isMongoId().withMessage("Invalid brand ID"),
 

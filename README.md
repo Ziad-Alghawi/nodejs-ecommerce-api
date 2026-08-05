@@ -1,12 +1,12 @@
 # Node.js E-Commerce API (v1)
 
-![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-24%2B-339933?logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-5.x-000000?logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white)
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)
 
 A modular REST API for e-commerce use cases, built with Node.js, Express, and MongoDB.
-The current scope includes authentication, role-based access control, catalog management, reviews, wishlist, user addresses, image processing, validation, and reusable query utilities.
+The current scope includes authentication, role-based access control, catalog management, reviews, wishlist, addresses, coupons, cart, orders, payment workflows, image processing, validation, and reusable query utilities.
 
 ## Table of Contents
 
@@ -122,7 +122,10 @@ Recommended additional badges for GitHub (optional):
 |   `-- validatorMiddleware.js
 |-- models/
 |   |-- brandModel.js
+|   |-- cartModel.js
 |   |-- categoryModel.js
+|   |-- couponModel.js
+|   |-- orderModel.js
 |   |-- productModel.js
 |   |-- reviewModel.js
 |   |-- subCategoryModel.js
@@ -131,7 +134,10 @@ Recommended additional badges for GitHub (optional):
 |   |-- addressRoute.js
 |   |-- authRoute.js
 |   |-- brandRoute.js
+|   |-- cartRoute.js
 |   |-- categoryRoute.js
+|   |-- couponRoute.js
+|   |-- orderRoute.js
 |   |-- productRoute.js
 |   |-- reviewRoute.js
 |   |-- subCategoryRoute.js
@@ -141,8 +147,11 @@ Recommended additional badges for GitHub (optional):
 |   |-- addressService.js
 |   |-- authService.js
 |   |-- brandService.js
+|   |-- cartService.js
 |   |-- categoryService.js
+|   |-- couponService.js
 |   |-- handlersFactory.js
+|   |-- orderService.js
 |   |-- productService.js
 |   |-- reviewService.js
 |   |-- subCategoryService.js
@@ -213,6 +222,9 @@ Base URL: `http://localhost:8000/api/v1`
 | Reviews        | `/reviews`       |
 | Wishlist       | `/wishlist`      |
 | Addresses      | `/addresses`     |
+| Coupons        | `/coupons`       |
+| Cart           | `/cart`          |
+| Orders         | `/orders`        |
 
 ## Sample API Calls
 
@@ -288,7 +300,7 @@ GET /api/v1/products?keyword=iphone&sort=-price&limit=5&page=1
 
 ### Models
 
-- User, Category, SubCategory, Brand, Product, Review
+- User, Category, SubCategory, Brand, Product, Review, Coupon, Cart, Order
 
 ### Key Relationships & Patterns
 
@@ -311,6 +323,8 @@ GET /api/v1/products?keyword=iphone&sort=-price&limit=5&page=1
 - Categories, subcategories, brands, products modules.
 - Reviews with ownership checks and rating aggregation updates.
 - Wishlist and addresses modules.
+- Coupons, cart, and orders modules.
+- Cash and online checkout workflows.
 - Image upload/processing pipeline.
 - Validation, API query features, and centralized error handling.
 
@@ -321,13 +335,8 @@ GET /api/v1/products?keyword=iphone&sort=-price&limit=5&page=1
 
 ## Roadmap
 
-Planned modules and platform upgrades (not implemented yet):
+Planned platform upgrades:
 
-- [ ] Coupons
-- [ ] Shopping Cart
-- [ ] Orders
-- [ ] Online Payments
-- [ ] Cash Orders
 - [ ] Deployment and release pipeline
 - [ ] Security hardening (rate limiting, secure headers, sanitization, CORS hardening, brute-force protection)
 
@@ -363,11 +372,11 @@ Create `config.env` in project root:
 npm run start:dev
 
 # Production mode
-npm run start:prod
+npm start
 ```
 
 Entry point: `server.js`.
 
 ## License
 
-MIT
+ISC

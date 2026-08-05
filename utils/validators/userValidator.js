@@ -21,13 +21,13 @@ export const createUserValidator = [
     .withMessage("User email required")
     .isEmail()
     .withMessage("Invalid email format")
-    .custom((val) =>
-      User.findOne({ email: val }).then((user) => {
-        if (user) {
-          return Promise.reject(new Error("E-mail already in use"));
-        }
-      }),
-    ),
+    .custom(async (val) => {
+      const user = await User.findOne({ email: val });
+      if (user) {
+        return Promise.reject(new Error("E-mail already in use"));
+      }
+      return true;
+    }),
 
   check("password")
     .notEmpty()
@@ -77,13 +77,13 @@ export const updateUserValidator = [
     .withMessage("User email required")
     .isEmail()
     .withMessage("Invalid email format")
-    .custom((val) =>
-      User.findOne({ email: val }).then((user) => {
-        if (user) {
-          return Promise.reject(new Error("E-mail already in use"));
-        }
-      }),
-    ),
+    .custom(async (val, { req }) => {
+      const user = await User.findOne({ email: val });
+      if (user && user._id.toString() !== req.params.id) {
+        return Promise.reject(new Error("E-mail already in use"));
+      }
+      return true;
+    }),
 
   check("phone")
     .optional()
@@ -189,13 +189,13 @@ export const updateLoggedUserValidator = [
     .withMessage("User email required")
     .isEmail()
     .withMessage("Invalid email format")
-    .custom((val) =>
-      User.findOne({ email: val }).then((user) => {
-        if (user) {
-          return Promise.reject(new Error("E-mail already in use"));
-        }
-      }),
-    ),
+    .custom(async (val, { req }) => {
+      const user = await User.findOne({ email: val });
+      if (user && user._id.toString() !== req.user._id.toString()) {
+        return Promise.reject(new Error("E-mail already in use"));
+      }
+      return true;
+    }),
 
   check("phone")
     .optional()
