@@ -166,7 +166,7 @@ export const checkoutSession = asyncHandler(async (req, res, next) => {
           product_data: {
             name: req.user.name,
           },
-          unit_amount: totalOrderPrice * 100,
+          unit_amount: Math.round(totalOrderPrice * 100), // Stripe needs an integer
         },
         quantity: 1,
       },
