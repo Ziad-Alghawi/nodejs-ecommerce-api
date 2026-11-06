@@ -113,7 +113,7 @@ export const changeUserPasswordValidator = [
 
     .custom(async (val, { req }) => {
       // 1- Verify the current password
-      const user = await User.findById(req.params.id);
+      const user = await User.findById(req.params.id).select("+password");
       if (!user) {
         throw new Error("There is no user for this id");
       }
@@ -154,7 +154,7 @@ export const changeLoggedUserPasswordValidator = [
 
     .custom(async (val, { req }) => {
       // 1- Verify the current password
-      const user = await User.findById(req.user._id);
+      const user = await User.findById(req.user._id).select("+password");
       if (!user) {
         throw new Error("There is no user for this id");
       }

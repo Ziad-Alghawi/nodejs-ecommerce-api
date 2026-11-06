@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
+import { SENSITIVE_USER_FIELDS } from "../utils/sanitizeData.js";
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -28,12 +30,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "User password is required"],
       minlength: [6, "Too short user password"],
+      select: false,
     },
 
-    passwordChangedAt: Date,
-    passwordResetCode: String,
-    passwordResetExpires: Date,
-    passwordResetVerified: Boolean,
+    passwordChangedAt: { type: Date, select: false },
+    passwordResetCode: { type: String, select: false },
+    passwordResetExpires: { type: Date, select: false },
+    passwordResetVerified: { type: Boolean, select: false },
 
     role: {
       type: String,
@@ -63,7 +66,16 @@ const userSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    // select: false does not cover User.create() or ?fields=+password
+    toJSON: {
+      transform: (doc, ret) => {
+        SENSITIVE_USER_FIELDS.forEach((field) => delete ret[field]);
+        return ret;
+      },
+    },
+  },
 );
 
 userSchema.pre("save", async function () {

@@ -33,7 +33,7 @@ export const signup = asyncHandler(async (req, res) => {
 export const login = asyncHandler(async (req, res, next) => {
   // 1- check if email and password in the request body
   // 2- check if user exists & password is correct
-  const user = await User.findOne({ email: req.body.email });
+  const user = await User.findOne({ email: req.body.email }).select("+password");
   if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
     return next(new ApiError("Incorrect email or password", 401));
   }
@@ -67,7 +67,9 @@ export const protect = asyncHandler(async (req, res, next) => {
   const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
   // 3- check if user exists
-  const currentUser = await User.findById(decoded.userId);
+  const currentUser = await User.findById(decoded.userId).select(
+    "+passwordChangedAt",
+  );
   if (!currentUser) {
     return next(
       new ApiError(
@@ -195,7 +197,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
   // 1- Get user based on the email
   const user = await User.findOne({
     email: req.body.email,
-  });
+  }).select("+passwordResetVerified");
   if (!user) {
     return next(
       new ApiError(`There is no user with this email ${req.body.email}`, 404),

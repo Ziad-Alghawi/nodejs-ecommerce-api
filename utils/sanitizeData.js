@@ -1,3 +1,12 @@
+// Must never appear in a response or be usable in a client-supplied filter
+export const SENSITIVE_USER_FIELDS = [
+  "password",
+  "passwordChangedAt",
+  "passwordResetCode",
+  "passwordResetExpires",
+  "passwordResetVerified",
+];
+
 // To return only what is necessary
 
 export const sanitizeUser = (user) => ({
