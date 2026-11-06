@@ -1,3 +1,22 @@
+import { SENSITIVE_USER_FIELDS } from "./sanitizeData.js";
+
+// Drop client-supplied Mongo operators ($where, $ne, ...) and secret fields
+const stripUnsafeKeys = (value) => {
+  if (Array.isArray(value)) return value.map(stripUnsafeKeys);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(
+        ([key]) => !key.startsWith("$") && !SENSITIVE_USER_FIELDS.includes(key),
+      )
+      .map(([key, val]) => [key, stripUnsafeKeys(val)]),
+  );
+};
+
+// Treat the search keyword as plain text, not as a regular expression
+const escapeRegex = (text) =>
+  String(text).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 class ApiFeatures {
   constructor(mongooseQuery, queryString) {
     this.mongooseQuery = mongooseQuery;
@@ -10,7 +29,7 @@ class ApiFeatures {
     excludesFields.forEach((field) => delete queryStringObj[field]);
 
     // Apply filtering for gte, gt, lte, lt
-    let queryStr = JSON.stringify(queryStringObj);
+    let queryStr = JSON.stringify(stripUnsafeKeys(queryStringObj));
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
     // Build the query
@@ -20,7 +39,7 @@ class ApiFeatures {
 
   sort() {
     if (this.queryString.sort) {
-      const sortBy = this.queryString.sort.split(",").join(" ");
+      const sortBy = String(this.queryString.sort).split(",").join(" ");
       this.mongooseQuery = this.mongooseQuery.sort(sortBy);
     } else {
       this.mongooseQuery = this.mongooseQuery.sort("-createAt");
@@ -31,7 +50,7 @@ class ApiFeatures {
   limitFields() {
     if (this.queryString.fields) {
       // title,ratingsAverage,imageCover,price => "title ratingsAverage imageCover price"
-      const fields = this.queryString.fields.split(",").join(" ");
+      const fields = String(this.queryString.fields).split(",").join(" ");
       this.mongooseQuery = this.mongooseQuery.select(fields);
     } else {
       this.mongooseQuery = this.mongooseQuery.select("-__v");
@@ -41,14 +60,15 @@ class ApiFeatures {
 
   search(modelName) {
     if (this.queryString.keyword) {
+      const keyword = escapeRegex(this.queryString.keyword);
       let query = {};
       if (modelName === "Product") {
         query.$or = [
-          { title: { $regex: this.queryString.keyword, $options: "i" } }, //$options: "i"
-          { description: { $regex: this.queryString.keyword, $options: "i" } },
+          { title: { $regex: keyword, $options: "i" } }, //$options: "i"
+          { description: { $regex: keyword, $options: "i" } },
         ];
       } else {
-        query = { name: { $regex: this.queryString.keyword, $options: "i" } };
+        query = { name: { $regex: keyword, $options: "i" } };
       }
       this.mongooseQuery = this.mongooseQuery.find(query);
     }
