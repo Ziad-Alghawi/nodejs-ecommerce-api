@@ -21,7 +21,7 @@ export const uploadProductImage = uploadMixOfImages([
 
 export const resizeProductImages = asyncHandler(async (req, res, next) => {
   // 1- image processing for imageCover
-  if (req.files.imageCover) {
+  if (req.files && req.files.imageCover) {
     const imageCoverFileName = `product-${uuidv4()}-${Date.now()}-cover.jpeg`;
 
     await sharp(req.files.imageCover[0].buffer)
@@ -34,7 +34,7 @@ export const resizeProductImages = asyncHandler(async (req, res, next) => {
     req.body.imageCover = imageCoverFileName;
   }
   // 2- image processing for images
-  if (req.files.images) {
+  if (req.files && req.files.images) {
     req.body.images = [];
     await Promise.all(
       req.files.images.map(async (img, index) => {
