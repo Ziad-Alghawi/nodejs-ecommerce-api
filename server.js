@@ -7,6 +7,7 @@ import cors from "cors";
 import compression from "compression";
 import { rateLimit } from "express-rate-limit";
 import helmet from "helmet";
+import mongoose from "mongoose";
 import swaggerUi from "swagger-ui-express";
 
 import ApiError from "./utils/apiError.js";
@@ -24,6 +25,10 @@ const __dirname = path.resolve();
 dbConnection();
 
 const app = express();
+
+// Number of proxies in front of the app, so req.ip and req.protocol are correct
+const trustProxy = Number(process.env.TRUST_PROXY);
+if (trustProxy) app.set("trust proxy", trustProxy);
 
 // Enable other domains to access your API
 app.use(cors());
@@ -49,6 +54,15 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
   console.log(`node: ${process.env.NODE_ENV}`);
 }
+
+// Health check for the hosting platform
+app.get("/health", (req, res) => {
+  const isDbConnected = mongoose.connection.readyState === 1;
+  res.status(isDbConnected ? 200 : 503).json({
+    status: isDbConnected ? "ok" : "error",
+    database: isDbConnected ? "connected" : "disconnected",
+  });
+});
 
 // API docs
 app.use(
