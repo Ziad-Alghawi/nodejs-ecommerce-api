@@ -7,10 +7,12 @@ import cors from "cors";
 import compression from "compression";
 import { rateLimit } from "express-rate-limit";
 import helmet from "helmet";
+import swaggerUi from "swagger-ui-express";
 
 import ApiError from "./utils/apiError.js";
 import globalError from "./middlewares/errorMiddleware.js";
 import dbConnection from "./config/database.js";
+import openApiSpec from "./docs/openapi.js";
 import { webhookCheckout } from "./services/orderService.js";
 
 // // Routes
@@ -47,6 +49,16 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
   console.log(`node: ${process.env.NODE_ENV}`);
 }
+
+// API docs
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(openApiSpec, {
+    customSiteTitle: "E-Commerce API Docs",
+    swaggerOptions: { persistAuthorization: true },
+  }),
+);
 
 // Limit each IP to 100 requests per 15 min
 const limiter = rateLimit({
