@@ -41,8 +41,8 @@ You need Node.js 24 or newer and a MongoDB database (local, or a free Atlas clus
 1. Install the dependencies:
 
    ```bash
-   git clone https://github.com/Ziad-Alghawi/nodejs-ecommerce-api-v1.git
-   cd nodejs-ecommerce-api-v1
+   git clone https://github.com/Ziad-Alghawi/nodejs-ecommerce-api.git
+   cd nodejs-ecommerce-api
    npm install
    ```
 
