@@ -67,7 +67,7 @@ reviewSchema.post("save", async function () {
 });
 
 // Keep the product rating in sync when a review is updated
-reviewSchema.post("findOneAndUpdate", async function (doc) {
+reviewSchema.post("findOneAndUpdate", async (doc) => {
   if (doc) await doc.constructor.calcAverageRatingsAndQuantity(doc.product);
 });
 
