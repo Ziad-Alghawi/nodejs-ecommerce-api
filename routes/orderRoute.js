@@ -11,15 +11,26 @@ import {
 } from "../services/orderService.js";
 
 import { protect, allowedTo } from "../services/authService.js";
+import {
+  createOrderValidator,
+  orderIdValidator,
+} from "../utils/validators/orderValidator.js";
 
 const router = express.Router();
 
 // Protect all routes
 router.use(protect);
 
-router.get("/checkout-session/:cartId", allowedTo("user"), checkoutSession);
+router.get(
+  "/checkout-session/:cartId",
+  allowedTo("user"),
+  createOrderValidator,
+  checkoutSession,
+);
 
-router.route("/:cartId").post(allowedTo("user"), createCashOrder);
+router
+  .route("/:cartId")
+  .post(allowedTo("user"), createOrderValidator, createCashOrder);
 
 router.get(
   "/",
@@ -28,12 +39,23 @@ router.get(
   findAllOrders,
 );
 
-router.get("/:id", allowedTo("user", "admin", "manager"), findSpecificOrder);
+router.get(
+  "/:id",
+  allowedTo("user", "admin", "manager"),
+  orderIdValidator,
+  findSpecificOrder,
+);
 
-router.put("/:id/pay", allowedTo("admin", "manager"), updateOrderToPaid);
+router.put(
+  "/:id/pay",
+  allowedTo("admin", "manager"),
+  orderIdValidator,
+  updateOrderToPaid,
+);
 router.put(
   "/:id/deliver",
   allowedTo("admin", "manager"),
+  orderIdValidator,
   updateOrderToDelivered,
 );
 

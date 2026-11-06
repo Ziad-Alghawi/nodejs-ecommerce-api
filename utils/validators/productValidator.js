@@ -161,6 +161,20 @@ export const updateProductValidator = [
       req.body.slug = slugify(val);
       return true;
     }),
+  check("quantity")
+    .optional()
+    .isNumeric()
+    .withMessage("Product quantity must be a number"),
+  check("price")
+    .optional()
+    .isNumeric()
+    .withMessage("Product price must be a number"),
+  check("priceAfterDiscount")
+    .optional()
+    .isNumeric()
+    .withMessage("Product price after discount must be a number"),
+  check("category").optional().isMongoId().withMessage("Invalid category ID"),
+  check("brand").optional().isMongoId().withMessage("Invalid brand ID"),
   validatorMiddleware,
 ];
 

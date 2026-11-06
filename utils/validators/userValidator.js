@@ -52,7 +52,10 @@ export const createUserValidator = [
 
   check("profileImage").optional(),
 
-  check("role").optional(),
+  check("role")
+    .optional()
+    .isIn(["user", "manager", "admin"])
+    .withMessage("Role must be user, manager or admin"),
 
   validatorMiddleware,
 ];
@@ -92,7 +95,10 @@ export const updateUserValidator = [
 
   check("profileImage").optional(),
 
-  check("role").optional(),
+  check("role")
+    .optional()
+    .isIn(["user", "manager", "admin"])
+    .withMessage("Role must be user, manager or admin"),
 
   validatorMiddleware,
 ];
@@ -110,6 +116,8 @@ export const changeUserPasswordValidator = [
   body("password")
     .notEmpty()
     .withMessage("You must enter your new password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long")
 
     .custom(async (val, { req }) => {
       // 1- Verify the current password
@@ -151,6 +159,8 @@ export const changeLoggedUserPasswordValidator = [
   body("password")
     .notEmpty()
     .withMessage("You must enter your new password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long")
 
     .custom(async (val, { req }) => {
       // 1- Verify the current password

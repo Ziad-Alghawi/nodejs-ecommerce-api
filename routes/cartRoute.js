@@ -10,6 +10,12 @@ import {
 } from "../services/cartService.js";
 
 import { protect, allowedTo } from "../services/authService.js";
+import {
+  addProductToCartValidator,
+  updateCartItemValidator,
+  removeCartItemValidator,
+  applyCouponValidator,
+} from "../utils/validators/cartValidator.js";
 
 const router = express.Router();
 
@@ -17,15 +23,15 @@ router.use(protect, allowedTo("user"));
 // http://localhost:8000/api/v1/Carts
 router
   .route("/")
-  .post(addProductToCart)
+  .post(addProductToCartValidator, addProductToCart)
   .get(getLoggedUserCart)
   .delete(clearCart);
 
-router.put("/applyCoupon", applyCoupon);
+router.put("/applyCoupon", applyCouponValidator, applyCoupon);
 
 router
   .route("/:itemId")
-  .put(UpdateCartItemQuantity)
-  .delete(removeSpecificCartItem);
+  .put(updateCartItemValidator, UpdateCartItemQuantity)
+  .delete(removeCartItemValidator, removeSpecificCartItem);
 
 export default router;

@@ -51,12 +51,52 @@ export const loginValidator = [
   check("email")
     .notEmpty()
     .withMessage("User email required")
+    .isString()
+    .withMessage("Invalid email format")
     .isEmail()
     .withMessage("Invalid email format"),
 
   check("password")
     .notEmpty()
     .withMessage("Password is required")
+    .isString()
+    .withMessage("Password must be a string")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long"),
+
+  validatorMiddleware,
+];
+
+export const forgotPasswordValidator = [
+  check("email")
+    .isString()
+    .withMessage("User email required")
+    .isEmail()
+    .withMessage("Invalid email format"),
+
+  validatorMiddleware,
+];
+
+export const verifyResetCodeValidator = [
+  check("resetCode")
+    .isString()
+    .withMessage("Reset code required")
+    .isLength({ min: 6, max: 6 })
+    .withMessage("Reset code must be 6 digits"),
+
+  validatorMiddleware,
+];
+
+export const resetPasswordValidator = [
+  check("email")
+    .isString()
+    .withMessage("User email required")
+    .isEmail()
+    .withMessage("Invalid email format"),
+
+  check("newPassword")
+    .isString()
+    .withMessage("New password required")
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters long"),
 
