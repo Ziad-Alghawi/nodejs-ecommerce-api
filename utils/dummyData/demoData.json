@@ -1,0 +1,128 @@
+{
+  "users": [
+    { "name": "Demo Admin", "email": "admin@example.com", "role": "admin" },
+    { "name": "Demo Manager", "email": "manager@example.com", "role": "manager" },
+    { "name": "Demo User", "email": "user@example.com", "role": "user" }
+  ],
+  "categories": [
+    { "name": "Electronics", "image": "demo-electronics.jpeg" },
+    { "name": "Clothing", "image": "demo-clothing.jpeg" },
+    { "name": "Home & Kitchen", "image": "demo-home-kitchen.jpeg" },
+    { "name": "Sports & Outdoors", "image": "demo-sports-outdoors.jpeg" }
+  ],
+  "brands": [
+    { "name": "Demo Brand One" },
+    { "name": "Demo Brand Two" },
+    { "name": "Demo Brand Three" }
+  ],
+  "coupons": [{ "name": "DEMO10", "discount": 10, "validDays": 365 }],
+  "products": [
+    {
+      "title": "Wireless Over-Ear Headphones",
+      "description": "Comfortable over-ear headphones with soft cushions and a long battery life.",
+      "price": 79.99,
+      "quantity": 40,
+      "colors": ["black", "white"],
+      "category": "Electronics",
+      "brand": "Demo Brand One"
+    },
+    {
+      "title": "Portable Power Bank 10000 mAh",
+      "description": "Slim power bank with two output ports for charging on the go.",
+      "price": 24.5,
+      "quantity": 75,
+      "colors": ["black"],
+      "category": "Electronics",
+      "brand": "Demo Brand One"
+    },
+    {
+      "title": "Mechanical Keyboard - Compact Layout",
+      "description": "Compact mechanical keyboard with tactile switches and a detachable cable.",
+      "price": 64.0,
+      "quantity": 30,
+      "colors": ["grey"],
+      "category": "Electronics",
+      "brand": "Demo Brand Two"
+    },
+    {
+      "title": "Men's Fleece Hoodie - Light Teal",
+      "description": "Warm fleece hoodie with a relaxed fit and a front pocket.",
+      "price": 27.5,
+      "quantity": 60,
+      "colors": ["teal"],
+      "category": "Clothing",
+      "brand": "Demo Brand Two"
+    },
+    {
+      "title": "Women's Rain Jacket - Navy",
+      "description": "Lightweight rain jacket with a hood and sealed seams for wet days.",
+      "price": 54.9,
+      "quantity": 35,
+      "colors": ["navy"],
+      "category": "Clothing",
+      "brand": "Demo Brand Three"
+    },
+    {
+      "title": "Organic Cotton T-Shirt",
+      "description": "Soft everyday t-shirt made from organic cotton in a regular fit.",
+      "price": 14.99,
+      "quantity": 120,
+      "colors": ["white", "black", "green"],
+      "category": "Clothing",
+      "brand": "Demo Brand Three"
+    },
+    {
+      "title": "Non-Stick Cook Set With Lids - 4 Pieces",
+      "description": "Four-piece non-stick cook set with glass lids, suitable for all hobs.",
+      "price": 67.99,
+      "quantity": 25,
+      "colors": ["black"],
+      "category": "Home & Kitchen",
+      "brand": "Demo Brand One"
+    },
+    {
+      "title": "Stainless Steel Water Kettle",
+      "description": "Electric kettle with a 1.7 litre capacity and automatic shut-off.",
+      "price": 32.0,
+      "quantity": 45,
+      "colors": ["silver"],
+      "category": "Home & Kitchen",
+      "brand": "Demo Brand Two"
+    },
+    {
+      "title": "Bamboo Cutting Board Set",
+      "description": "Set of three bamboo cutting boards in different sizes for daily use.",
+      "price": 19.95,
+      "quantity": 80,
+      "category": "Home & Kitchen",
+      "brand": "Demo Brand Three"
+    },
+    {
+      "title": "Non-Slip Yoga Mat",
+      "description": "Cushioned yoga mat with a non-slip surface and a carrying strap.",
+      "price": 22.0,
+      "quantity": 55,
+      "colors": ["purple", "blue"],
+      "category": "Sports & Outdoors",
+      "brand": "Demo Brand One"
+    },
+    {
+      "title": "Insulated Steel Bottle 750 ml",
+      "description": "Double-wall steel bottle that keeps drinks cold for up to 24 hours.",
+      "price": 18.5,
+      "quantity": 90,
+      "colors": ["blue", "green"],
+      "category": "Sports & Outdoors",
+      "brand": "Demo Brand Two"
+    },
+    {
+      "title": "Two-Person Camping Tent",
+      "description": "Lightweight two-person tent with a waterproof flysheet and quick setup.",
+      "price": 89.0,
+      "quantity": 20,
+      "colors": ["green"],
+      "category": "Sports & Outdoors",
+      "brand": "Demo Brand Three"
+    }
+  ]
+}
