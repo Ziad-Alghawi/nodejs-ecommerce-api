@@ -2,14 +2,13 @@
 node_modules/
 
 # Environment variables
+.env
+.env.*
+!.env.example
 config.env
 
-# Uploaded files
-uploads/*
-!uploads/.gitkeep
-
-uploads/brands/*
-!uploads/brands/.gitkeep
-
-uploads/categories/*
-!uploads/categories/.gitkeep
+# Uploaded files (keep the folders and the demo placeholder images)
+uploads/**
+!uploads/**/
+!uploads/**/.gitkeep
+!uploads/**/demo-*.jpeg
