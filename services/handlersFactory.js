@@ -26,8 +26,6 @@ export const updateOne = (Model) =>
         new ApiError(`No document for this id ${req.params.id} `, 404),
       );
     }
-    // Trigger "save" when update document
-    document.save();
     res.status(200).json({ data: document });
   });
 
@@ -77,7 +75,8 @@ export const getAll = (Model, modelName = "") =>
 
     // execute the query
     const { mongooseQuery, paginationResult } = apiFeatures;
-    const documents = await mongooseQuery;
+    // Re-apply the server filter last so ?user=<id> can't override it
+    const documents = await mongooseQuery.find(filter);
 
     res.status(200).json({
       results: documents.length,
