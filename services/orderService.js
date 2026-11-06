@@ -21,7 +21,10 @@ export const createCashOrder = asyncHandler(async (req, res, next) => {
   const shippingPrice = 0;
 
   // 1- Get cart based on cartId
-  const cart = await Cart.findById(req.params.cartId);
+  const cart = await Cart.findOne({
+    _id: req.params.cartId,
+    user: req.user._id,
+  });
   if (!cart) {
     return next(
       new ApiError(`No cart found with this id: ${req.params.cartId}`, 404),
@@ -137,7 +140,10 @@ export const checkoutSession = asyncHandler(async (req, res, next) => {
   const shippingPrice = 0;
 
   // 1- Get cart based on cartId
-  const cart = await Cart.findById(req.params.cartId);
+  const cart = await Cart.findOne({
+    _id: req.params.cartId,
+    user: req.user._id,
+  });
   if (!cart) {
     return next(
       new ApiError(`No cart found with this id: ${req.params.cartId}`, 404),
