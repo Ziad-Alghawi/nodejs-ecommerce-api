@@ -1,414 +1,116 @@
-# Node.js E-Commerce API (v1)
+# Node.js E-Commerce API
 
-![Node.js](https://img.shields.io/badge/Node.js-24%2B-339933?logo=node.js&logoColor=white)
-![Express](https://img.shields.io/badge/Express-5.x-000000?logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white)
-![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)
+A REST API for an online shop with role-based access, a product catalog, cart, orders and Stripe payments.
 
-A modular REST API for e-commerce use cases, built with Node.js, Express, and MongoDB.
-The current scope includes authentication, role-based access control, catalog management, reviews, wishlist, addresses, coupons, cart, orders, payment workflows, image processing, validation, and reusable query utilities.
+![API requests and responses](docs/ecommerce-api.png)
 
-## Table of Contents
+## Features
 
-- [Overview](#overview)
-- [Feature Set](#feature-set)
-- [Tech Stack](#tech-stack)
-- [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Request Flow Diagram](#request-flow-diagram)
-- [Request Lifecycle](#request-lifecycle)
-- [API Modules](#api-modules)
-- [Sample API Calls](#sample-api-calls)
-- [Postman Collection](#postman-collection)
-- [Authentication and Security](#authentication-and-security)
-- [Validation and Error Handling](#validation-and-error-handling)
-- [Database Design](#database-design)
-- [Project Status](#project-status)
-- [Roadmap](#roadmap)
-- [Installation](#installation)
-- [Environment Variables](#environment-variables)
-- [Run the Project](#run-the-project)
-- [License](#license)
+- JWT authentication with signup, login and password reset by email code
+- Role-based access for users, managers and admins
+- Products, categories, subcategories and brands with image upload and resizing
+- Reviews with automatic product ratings, one review per user and product
+- Wishlist, saved addresses, coupons and cart
+- Cash orders and Stripe Checkout with a webhook
+- Filtering, search, sorting, field selection and pagination on list routes
+- Secure headers, rate limiting, input validation and secret fields kept out of every response
+- Swagger UI and a Postman collection
 
-## Overview
+## Tech stack
 
-This project follows a layered backend architecture:
+Node.js, Express 5, MongoDB, Mongoose, JWT, bcrypt, express-validator, Multer, Sharp, Stripe, Nodemailer, Helmet, Swagger UI
 
-- route modules define endpoint contracts,
-- service modules implement business logic,
-- Mongoose models encapsulate data access and schema behavior,
-- shared middleware/utilities standardize validation, errors, and query behavior.
+## Roles
 
-## Feature Set
+| Action                                                      | Visitor | User | Manager | Admin |
+| ----------------------------------------------------------- | :-----: | :--: | :-----: | :---: |
+| Browse products, categories, brands and reviews             |   Yes   | Yes  |   Yes   |  Yes  |
+| Manage own profile                                          |         | Yes  |   Yes   |  Yes  |
+| Use wishlist, addresses and cart, place orders, write reviews |         | Yes  |         |       |
+| View orders                                                 |         | Own  |   All   |  All  |
+| Create and update catalog items and coupons                 |         |      |   Yes   |  Yes  |
+| View users, mark orders as paid or delivered                |         |      |   Yes   |  Yes  |
+| Delete any review                                           |         |      |   Yes   |  Yes  |
+| Delete catalog items and coupons                            |         |      |         |  Yes  |
+| Create, update and delete users                             |         |      |         |  Yes  |
 
-### Authentication and Authorization
+## Run locally
 
-- JWT-based signup and login.
-- Route protection using Bearer tokens.
-- Role-based authorization (`user`, `manager`, `admin`).
-- Password reset workflow with email OTP verification.
-- Token invalidation after password changes.
+You need Node.js 24 or newer and a MongoDB database (local, or a free Atlas cluster).
 
-### User Management
+1. Install the dependencies:
 
-- Admin/manager user listing and retrieval.
-- Admin create, update, delete, and password-change operations.
-- Logged-in user profile operations (read, update, password update, deactivation).
-- Optional profile image upload and processing.
+   ```bash
+   git clone https://github.com/Ziad-Alghawi/nodejs-ecommerce-api-v1.git
+   cd nodejs-ecommerce-api-v1
+   npm install
+   ```
 
-### Catalog and Content
+2. Create your environment file and set `DB_URI` in it:
 
-- Products: full CRUD with image cover and gallery uploads.
-- Categories: full CRUD.
-- Subcategories: full CRUD with category nested routes.
-- Brands: full CRUD with image upload.
-- Reviews: full CRUD with ownership checks and one-review-per-user-per-product enforcement.
+   ```bash
+   cp .env.example .env
+   ```
 
-### Customer Features
+3. Add the demo data and start the server:
 
-- Wishlist: add, remove, and list products for logged-in users.
-- Addresses: add, remove, and list saved addresses.
+   ```bash
+   npm run seed
+   npm run start:dev
+   ```
 
-### API Utilities and Platform Concerns
+Then open <http://localhost:8000/api-docs>.
 
-- Filtering, keyword search, sorting, field limiting, and pagination.
-- Centralized error handling with environment-aware responses.
-- Request validation with `express-validator`.
-- Image handling with Multer (memory storage) and Sharp.
-- Rating aggregation updates on review create/delete.
+### Demo accounts
 
-## Tech Stack
+`npm run seed` creates these accounts, plus demo categories, brands, products and the coupon `DEMO10`. All of them are fake. `npm run seed:destroy` removes only the demo data.
 
-### Backend Core
+| Role    | Email                 | Password        |
+| ------- | --------------------- | --------------- |
+| Admin   | `admin@example.com`   | `demo-pass-123` |
+| Manager | `manager@example.com` | `demo-pass-123` |
+| User    | `user@example.com`    | `demo-pass-123` |
 
-- Node.js
-- Express.js (v5)
-- MongoDB
-- Mongoose
+## Environment variables
 
-### Main Packages
+| Variable                | Description                                                 |
+| ----------------------- | ----------------------------------------------------------- |
+| `PORT`                  | Server port, defaults to `8000`                             |
+| `NODE_ENV`              | `development` or `production`                               |
+| `BASE_URI`              | Base URL used in image links                                |
+| `TRUST_PROXY`           | Number of proxies in front of the app, `0` when run locally |
+| `DB_URI`                | MongoDB connection string                                   |
+| `JWT_SECRET_KEY`        | Secret used to sign tokens                                  |
+| `JWT_EXPIRES_TIME`      | Token lifetime, for example `90d`                           |
+| `EMAIL_HOST`            | SMTP host, for password reset emails                        |
+| `EMAIL_PORT`            | SMTP port (TLS, for example `465`)                          |
+| `EMAIL_USER`            | SMTP user                                                   |
+| `EMAIL_PASS`            | SMTP password                                               |
+| `STRIPE_SECRET`         | Stripe test secret key, required at startup                 |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret                               |
 
-| Purpose         | Package                               |
-| --------------- | ------------------------------------- |
-| Auth            | `jsonwebtoken`, `bcryptjs`            |
-| Validation      | `express-validator`                   |
-| Async handlers  | `express-async-handler`               |
-| Upload/Images   | `multer`, `sharp`                     |
-| Email           | `nodemailer`                          |
-| Query/Utilities | `slugify`, `uuid`, `dotenv`, `morgan` |
+## API docs
 
-Recommended additional badges for GitHub (optional):
+- Swagger UI: [`/api-docs`](http://localhost:8000/api-docs). Log in, click **Authorize** and paste the token.
+- Postman: import [`postman/ecommerce-api.postman_collection.json`](postman/ecommerce-api.postman_collection.json).
+- Health check: `GET /health`
+- Base path: `/api/v1`
 
-- npm version
-- CI status (once workflows are added)
-- last commit
-- code style (ESLint/Prettier)
-
-## Architecture
-
-- Pattern: Layered architecture with feature-oriented modules.
-- Reuse strategy: Generic CRUD handlers via `services/handlersFactory.js`.
-- Data behavior: Model hooks, populate, virtuals, and aggregation are handled at the model layer.
-- API consistency: Shared middleware for validation, upload filtering, and error formatting.
-
-## Project Structure
+## Project structure
 
 ```text
-.
-|-- config/
-|   `-- database.js
-|-- middlewares/
-|   |-- errorMiddleware.js
-|   |-- uploadImageMiddleware.js
-|   `-- validatorMiddleware.js
-|-- models/
-|   |-- brandModel.js
-|   |-- cartModel.js
-|   |-- categoryModel.js
-|   |-- couponModel.js
-|   |-- orderModel.js
-|   |-- productModel.js
-|   |-- reviewModel.js
-|   |-- subCategoryModel.js
-|   `-- userModel.js
-|-- routes/
-|   |-- addressRoute.js
-|   |-- authRoute.js
-|   |-- brandRoute.js
-|   |-- cartRoute.js
-|   |-- categoryRoute.js
-|   |-- couponRoute.js
-|   |-- index.js
-|   |-- orderRoute.js
-|   |-- productRoute.js
-|   |-- reviewRoute.js
-|   |-- subCategoryRoute.js
-|   |-- userRoute.js
-|   `-- wishlistRoute.js
-|-- services/
-|   |-- addressService.js
-|   |-- authService.js
-|   |-- brandService.js
-|   |-- cartService.js
-|   |-- categoryService.js
-|   |-- couponService.js
-|   |-- handlersFactory.js
-|   |-- orderService.js
-|   |-- productService.js
-|   |-- reviewService.js
-|   |-- subCategoryService.js
-|   |-- userService.js
-|   `-- wishlistService.js
-|-- postman/
-|   `-- ecommerce-api.postman_collection.json
-|-- uploads/
-|   |-- brands/
-|   |-- categories/
-|   |-- products/
-|   `-- users/
-|-- utils/
-|   |-- apiError.js
-|   |-- apiFeatures.js
-|   |-- createToken.js
-|   |-- sanitizeData.js
-|   |-- sendEmail.js
-|   |-- dummyData/
-|   |   |-- products.json
-|   |   `-- seeder.js
-|   `-- validators/
-|       |-- authValidator.js
-|       |-- brandValidator.js
-|       |-- categoryValidator.js
-|       |-- productValidator.js
-|       |-- reviewValidator.js
-|       |-- subCategoryValidator.js
-|       `-- userValidator.js
-|-- .eslintrc.json
-|-- .gitignore
-|-- config.js
-|-- config.env
-|-- package-lock.json
-|-- package.json
-`-- server.js
+config/        Database connection
+docs/          OpenAPI spec and screenshot
+middlewares/   Error handling, validation and image upload
+models/        Mongoose schemas
+postman/       Postman collection
+routes/        Route definitions
+services/      Business logic
+uploads/       Uploaded images and demo placeholders
+utils/         Validators, query features, email and seed data
+server.js      App entry point
+render.yaml    Render deployment
 ```
-
-## Request Flow Diagram
-
-```mermaid
-flowchart LR
-    A[HTTP Request] --> B[Express App server.js]
-    B --> C[Route Module]
-    C --> D[Middleware Layer\nprotect, allowedTo, validators, upload]
-    D --> E[Service Handler]
-    E --> F[Model Layer Mongoose]
-    F --> G[(MongoDB)]
-    G --> F --> E --> H[JSON Response]
-    E --> I[ApiError]
-    I --> J[Global Error Middleware]
-    J --> H
-```
-
-## Request Lifecycle
-
-1. The request enters Express through `server.js`.
-2. The matched route applies middleware (auth, authorization, validation, upload handling).
-3. The service handler executes business logic.
-4. The model layer performs DB operations (including hooks/populate/aggregations when applicable).
-5. A JSON response or standardized error is returned.
-
-## API Modules
-
-Base URL: `http://localhost:8000/api/v1`
-
-| Module         | Base Path        |
-| -------------- | ---------------- |
-| Authentication | `/auth`          |
-| Users          | `/users`         |
-| Categories     | `/categories`    |
-| Subcategories  | `/subCategories` |
-| Brands         | `/brands`        |
-| Products       | `/products`      |
-| Reviews        | `/reviews`       |
-| Wishlist       | `/wishlist`      |
-| Addresses      | `/addresses`     |
-| Coupons        | `/coupons`       |
-| Cart           | `/cart`          |
-| Orders         | `/orders`        |
-
-- Authentication: signup/login, forgot-password flow, reset-code verification, and password reset.
-- Users: admin user CRUD and password changes, plus logged-user profile, password update, and account deactivation.
-- Categories and Subcategories: full CRUD, with nested subcategory routes under categories.
-- Brands: full CRUD with image upload and image processing.
-- Products: full CRUD with image cover/gallery uploads, query features (filtering/search/sort/pagination), and nested reviews routes.
-- Reviews: create/read/update/delete with ownership checks and one-review-per-user-per-product enforcement.
-- Wishlist: add, remove, and list wishlist items for the logged user.
-- Addresses: add, remove, and list saved addresses for the logged user.
-- Coupons: admin/manager coupon management (create, list, update, delete).
-- Cart: add items, update quantities, remove items, clear cart, and apply coupon discounts.
-- Orders and Payments: cash order creation, order retrieval and status updates, Stripe checkout session, and webhook-based online order completion.
-
-## Sample API Calls
-
-### 1) Signup
-
-**Request**
-
-```http
-POST /api/v1/auth/signup
-Content-Type: application/json
-
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "123456",
-  "passwordConfirm": "123456"
-}
-```
-
-**Response (201)**
-
-```json
-{
-  "data": {
-    "_id": "66b0f3d3f6f9f8a947f0a111",
-    "name": "John Doe",
-    "email": "john@example.com",
-    "role": "user"
-  },
-  "token": "<jwt-token>"
-}
-```
-
-### 2) Get Products (with query options)
-
-**Request**
-
-```http
-GET /api/v1/products?keyword=iphone&sort=-price&limit=5&page=1
-```
-
-**Response (200)**
-
-```json
-{
-  "results": 5,
-  "pagination": {
-    "currentPage": 1,
-    "limit": 5,
-    "numberOfPages": 4,
-    "next": 2
-  },
-  "data": []
-}
-```
-
-## Postman Collection
-
-- Collection file: `postman/ecommerce-api.postman_collection.json`.
-- Includes all currently implemented API requests, grouped by module (authentication, catalog, users, reviews, wishlist, addresses, coupons, cart, orders, and checkout flow), with both public and protected endpoints.
-- Can be imported directly into Postman to run and test the API modules end-to-end.
-
-Import and use:
-
-1. In Postman, choose **Import** and select `postman/ecommerce-api.postman_collection.json`.
-2. Set collection/environment variables used by requests (for example `URL` and `JWT`) to match your local API and token.
-3. Run auth requests first to get a token, then run protected requests (the auth request tests can save `JWT` automatically).
-
-## Authentication and Security
-
-- JWT issuance via `createToken` utility.
-- `protect` middleware verifies token validity, user existence, and password-change timestamp.
-- `allowedTo` middleware enforces RBAC.
-- Passwords are hashed with bcrypt (`userSchema.pre('save')`).
-- Reset OTP is hashed (SHA-256) and stored with expiration.
-
-## Validation and Error Handling
-
-- Validation rules live in `utils/validators/*` and execute before service handlers.
-- `validatorMiddleware` returns structured 400 validation responses.
-- `ApiError` standardizes operational errors.
-- `globalError` handles all propagated errors with dev/prod behavior and JWT-specific normalization.
-
-## Database Design
-
-### Models
-
-- User, Category, SubCategory, Brand, Product, Review, Coupon, Cart, Order
-
-### Key Relationships & Patterns
-
-- `Product.category` -> Category reference.
-- `Product.subcategories[]` -> SubCategory references.
-- `Product.brand` -> Brand reference.
-- `Review.product` and `Review.user` references.
-- Product virtual populate for `reviews`.
-- Review aggregation pipeline recalculates product rating averages/quantities.
-- Nested routes:
-  - `/categories/:categoryId/subcategories`
-  - `/products/:productId/reviews`
-
-## Project Status
-
-### Completed
-
-- Authentication and RBAC.
-- Users module (admin and logged-in user operations).
-- Categories, subcategories, brands, products modules.
-- Reviews with ownership checks and rating aggregation updates.
-- Wishlist and addresses modules.
-- Coupons, cart, and orders modules.
-- Cash and online checkout workflows.
-- Image upload/processing pipeline.
-- Validation, API query features, and centralized error handling.
-
-### In Progress
-
-- No additional domain module is currently under active implementation in this repository.
-- Next priority items are listed in the roadmap.
-
-## Roadmap
-
-Planned platform upgrades:
-
-- [ ] Deployment and release pipeline
-- [ ] Security hardening (rate limiting, secure headers, sanitization, CORS hardening, brute-force protection)
-
-## Installation
-
-```bash
-git clone <your-repo-url>
-cd nodejs-ecommerce-api-v1
-npm install
-```
-
-## Environment Variables
-
-Create `config.env` in project root:
-
-| Variable           | Description                                 |
-| ------------------ | ------------------------------------------- |
-| `PORT`             | API server port                             |
-| `NODE_ENV`         | Environment (`development` or `production`) |
-| `BASE_URI`         | Base URI for generated image links          |
-| `DB_URI`           | MongoDB connection string                   |
-| `JWT_SECRET_KEY`   | JWT signing secret                          |
-| `JWT_EXPIRES_TIME` | Token lifetime                              |
-| `EMAIL_HOST`       | SMTP host                                   |
-| `EMAIL_PORT`       | SMTP port                                   |
-| `EMAIL_USER`       | SMTP user                                   |
-| `EMAIL_PASS`       | SMTP password / app password                |
-
-## Run the Project
-
-```bash
-# Development
-npm run start:dev
-
-# Production mode
-npm start
-```
-
-Entry point: `server.js`.
 
 ## License
 
