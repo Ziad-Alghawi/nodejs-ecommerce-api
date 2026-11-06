@@ -55,9 +55,17 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again after 15 minutes",
 });
 
+// Stricter limit for login, signup and password reset (brute-force protection)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  message:
+    "Too many authentication attempts from this IP, please try again after 15 minutes",
+});
+
 // Apply the rate limiting middleware to all requests.
 app.use("/api/", limiter);
-// app.use("/api/v1/auth", authLimiter); // more more strict
+app.use("/api/v1/auth", authLimiter);
 
 // // mount Routes
 mountRoutes(app);

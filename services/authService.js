@@ -121,7 +121,7 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
     );
   }
   // 2- if user exists, Generate (hashed) random 6 digits number (OTP) and save it to DB
-  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const resetCode = crypto.randomInt(100000, 1000000).toString();
   const hashedResetCode = crypto
     .createHash("sha256")
     .update(resetCode)
@@ -209,6 +209,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
   }
 
   user.password = req.body.newPassword;
+  user.passwordChangedAt = Date.now(); // invalidate tokens issued before the reset
   user.passwordResetCode = undefined;
   user.passwordResetExpires = undefined;
   user.passwordResetVerified = undefined;
