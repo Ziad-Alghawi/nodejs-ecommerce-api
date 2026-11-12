@@ -257,7 +257,7 @@ const openApiSpec = {
     },
     "/users/changePassword/{id}": {
       put: op("Users", "Change a user's password", {
-        roles: staff,
+        roles: admin,
         params: [pathParam("id", "User ID")],
         body: passwordChange,
         codes: [400, 404],
@@ -297,6 +297,7 @@ const openApiSpec = {
       }),
       put: op("Users", "Update a user", {
         roles: admin,
+        description: "Admins cannot change their own role.",
         params: [pathParam("id", "User ID")],
         body: formBody(
           {

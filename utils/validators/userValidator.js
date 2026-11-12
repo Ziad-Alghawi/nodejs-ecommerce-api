@@ -98,7 +98,13 @@ export const updateUserValidator = [
   check("role")
     .optional()
     .isIn(["user", "manager", "admin"])
-    .withMessage("Role must be user, manager or admin"),
+    .withMessage("Role must be user, manager or admin")
+    .custom((val, { req }) => {
+      if (req.params.id === req.user._id.toString()) {
+        throw new Error("You cannot change your own role");
+      }
+      return true;
+    }),
 
   validatorMiddleware,
 ];

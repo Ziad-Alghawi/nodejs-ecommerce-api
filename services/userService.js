@@ -45,7 +45,19 @@ export const getUser = factory.getOne(User);
 // @desc Create a new user
 // @route POST /api/v1/users
 // @access Private/admin
-export const createUser = factory.createOne(User);
+export const createUser = asyncHandler(async (req, res) => {
+  const { name, slug, email, phone, password, profileImage, role } = req.body;
+  const user = await User.create({
+    name,
+    slug,
+    email,
+    phone,
+    password,
+    profileImage,
+    role,
+  });
+  res.status(201).json({ data: user });
+});
 
 //@desc  update a specific user by id
 // @route PUT /api/v1/users/:id

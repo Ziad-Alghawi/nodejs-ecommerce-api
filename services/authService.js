@@ -34,7 +34,11 @@ export const login = asyncHandler(async (req, res, next) => {
   // 1- check if email and password in the request body
   // 2- check if user exists & password is correct
   const user = await User.findOne({ email: req.body.email }).select("+password");
-  if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
+  if (
+    !user ||
+    !user.active ||
+    !(await bcrypt.compare(req.body.password, user.password))
+  ) {
     return next(new ApiError("Incorrect email or password", 401));
   }
   // 3- generate token
@@ -70,7 +74,7 @@ export const protect = asyncHandler(async (req, res, next) => {
   const currentUser = await User.findById(decoded.userId).select(
     "+passwordChangedAt",
   );
-  if (!currentUser) {
+  if (!currentUser || !currentUser.active) {
     return next(
       new ApiError(
         "The user belonging to this token does no longer exist",
@@ -197,14 +201,17 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
   // 1- Get user based on the email
   const user = await User.findOne({
     email: req.body.email,
-  }).select("+passwordResetVerified");
+  }).select("+passwordResetVerified +passwordResetExpires");
   if (!user) {
     return next(
       new ApiError(`There is no user with this email ${req.body.email}`, 404),
     );
   }
-  // 2- Check if the reset code is verified
-  if (!user.passwordResetVerified) {
+  // 2- Check if the reset code is verified and still valid
+  if (
+    !user.passwordResetVerified ||
+    !(user.passwordResetExpires > Date.now())
+  ) {
     return next(new ApiError("Reset code not verified", 400));
   }
 

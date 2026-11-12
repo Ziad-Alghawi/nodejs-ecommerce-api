@@ -43,6 +43,7 @@ router.delete("/deleteMe", deleteLoggedUser);
 router.use(allowedTo("admin", "manager"));
 router.put(
   "/changePassword/:id",
+  allowedTo("admin"),
   changeUserPasswordValidator,
   changeUserPassword,
 );

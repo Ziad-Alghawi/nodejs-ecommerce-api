@@ -36,9 +36,10 @@ export const setProductIdAndUserIdToBody = (req, res, next) => {
 // @access Private/Protect/User
 export const createReview = factory.createOne(Review);
 
-// Ignore any user field sent by the client and use the authenticated user instead
-export const removeUserFromBody = (req, res, next) => {
+// A review always stays with its original author and product
+export const removeUserAndProductFromBody = (req, res, next) => {
   delete req.body.user;
+  delete req.body.product;
   next();
 };
 

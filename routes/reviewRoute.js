@@ -14,7 +14,7 @@ import {
   deleteReview,
   createFilterObject,
   setProductIdAndUserIdToBody,
-  removeUserFromBody,
+  removeUserAndProductFromBody,
 } from "../services/reviewService.js";
 
 import { protect, allowedTo } from "../services/authService.js";
@@ -38,7 +38,7 @@ router
   .put(
     protect,
     allowedTo("user"),
-    removeUserFromBody,
+    removeUserAndProductFromBody,
     updateReviewValidator,
     updateReview,
   )
