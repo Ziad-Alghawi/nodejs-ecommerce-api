@@ -1,0 +1,36 @@
+name: CI
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    services:
+      mongo:
+        image: mongo:8
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      # Each test file uses a database of its own on the MongoDB service
+      - name: Test
+        run: npm test
+        env:
+          TEST_DB_URI: mongodb://localhost:27017
