@@ -73,6 +73,18 @@ Then open <http://localhost:8000/api-docs>.
 | Manager | `manager@example.com` | `demo-pass-123` |
 | User    | `user@example.com`    | `demo-pass-123` |
 
+## Deploy to Render
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Ziad-Alghawi/nodejs-ecommerce-api)
+
+[`render.yaml`](render.yaml) describes one free web service in Frankfurt with a health check on `/health`.
+
+1. Create a free MongoDB Atlas M0 cluster, allow access from anywhere (`0.0.0.0/0`, Render Free has no fixed IP) and copy its connection string.
+2. Click the button above. Render asks for `DB_URI` (the Atlas string), `STRIPE_SECRET` (a `sk_test_` key) and `STRIPE_WEBHOOK_SECRET`; `JWT_SECRET_KEY` is generated.
+3. Load the demo data once from your machine with the Atlas string in `.env`: `npm run seed`.
+
+Then open `https://<your-service>.onrender.com/api-docs`. The free service sleeps when idle, so the first request can take about a minute, and Render Free blocks SMTP, so password reset emails are not sent there.
+
 ## Environment variables
 
 | Variable                | Description                                                 |
