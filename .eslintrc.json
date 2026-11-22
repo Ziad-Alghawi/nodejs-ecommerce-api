@@ -1,6 +1,7 @@
 {
   "extends": ["airbnb", "prettier", "plugin:node/recommended"],
   "plugins": ["prettier"],
+  "parserOptions": { "ecmaVersion": 2022, "sourceType": "module" },
   "settings": {
     "import/resolver": {
       "node": {
@@ -26,5 +27,15 @@
     "no-unused-vars": ["warn", { "argsIgnorePattern": "req|res|next|val" }],
     "import/prefer-default-export": "off",
     "import/extensions": "off"
-  }
+  },
+  "overrides": [
+    {
+      // Tests use dev dependencies and send some requests one after another on purpose
+      "files": ["test/**/*.js"],
+      "rules": {
+        "node/no-unpublished-import": "off",
+        "no-await-in-loop": "off"
+      }
+    }
+  ]
 }
