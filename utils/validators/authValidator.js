@@ -77,22 +77,28 @@ export const forgotPasswordValidator = [
   validatorMiddleware,
 ];
 
-export const verifyResetCodeValidator = [
-  check("resetCode")
-    .isString()
-    .withMessage("Reset code required")
-    .isLength({ min: 6, max: 6 })
-    .withMessage("Reset code must be 6 digits"),
-
-  validatorMiddleware,
-];
-
-export const resetPasswordValidator = [
+// The reset code belongs to one email, so both are needed to check it
+const resetCodeChecks = [
   check("email")
     .isString()
     .withMessage("User email required")
     .isEmail()
     .withMessage("Invalid email format"),
+
+  check("resetCode")
+    .isString()
+    .withMessage("Reset code required")
+    .matches(/^\d{6}$/)
+    .withMessage("Reset code must be 6 digits"),
+];
+
+export const verifyResetCodeValidator = [
+  ...resetCodeChecks,
+  validatorMiddleware,
+];
+
+export const resetPasswordValidator = [
+  ...resetCodeChecks,
 
   check("newPassword")
     .isString()

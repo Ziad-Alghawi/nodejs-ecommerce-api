@@ -59,7 +59,15 @@ const errors = {
 const op = (
   tag,
   summary,
-  { roles, params = [], body, status = 200, schema, description, codes = [] } = {},
+  {
+    roles,
+    params = [],
+    body,
+    status = 200,
+    schema,
+    description,
+    codes = [],
+  } = {},
 ) => {
   const isPrivate = roles !== undefined;
   const access = isPrivate
@@ -212,24 +220,29 @@ const openApiSpec = {
       }),
     },
     "/auth/forgotpassword": {
-      post: op("Auth", "Email a 6-digit reset code", {
-        body: jsonBody({ email: str }, ["email"]),
-        codes: [400, 404, 429],
-      }),
+      post: op(
+        "Auth",
+        "Email a 6-digit reset code (same answer whether or not the account exists)",
+        {
+          body: jsonBody({ email: str }, ["email"]),
+          codes: [400, 429],
+        },
+      ),
     },
     "/auth/verifyResetCode": {
-      post: op("Auth", "Verify the reset code", {
-        body: jsonBody({ resetCode: str }, ["resetCode"]),
+      post: op("Auth", "Check a reset code (5 wrong codes use it up)", {
+        body: jsonBody({ email: str, resetCode: str }, ["email", "resetCode"]),
         codes: [400, 429],
       }),
     },
     "/auth/resetpassword": {
-      put: op("Auth", "Set a new password after verifying the code", {
-        body: jsonBody({ email: str, newPassword: str }, [
+      put: op("Auth", "Set a new password with the reset code", {
+        body: jsonBody({ email: str, resetCode: str, newPassword: str }, [
           "email",
+          "resetCode",
           "newPassword",
         ]),
-        codes: [400, 404, 429],
+        codes: [400, 429],
       }),
     },
 

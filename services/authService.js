@@ -33,7 +33,9 @@ export const signup = asyncHandler(async (req, res) => {
 export const login = asyncHandler(async (req, res, next) => {
   // 1- check if email and password in the request body
   // 2- check if user exists & password is correct
-  const user = await User.findOne({ email: req.body.email }).select("+password");
+  const user = await User.findOne({ email: req.body.email }).select(
+    "+password",
+  );
   if (
     !user ||
     !user.active ||
@@ -113,6 +115,62 @@ export const allowedTo = (...roles) =>
     next();
   });
 
+// Wrong codes allowed per reset code; after the last one the code is dropped
+const MAX_RESET_CODE_ATTEMPTS = 5;
+
+// Same answer whether or not an account exists, so the route can't be used to find accounts
+const RESET_CODE_SENT_MESSAGE =
+  "If an account exists for this email, a reset code has been sent to it";
+
+const hashResetCode = (resetCode) =>
+  crypto.createHash("sha256").update(resetCode).digest("hex");
+
+const clearResetCode = (user) => {
+  user.passwordResetCode = undefined;
+  user.passwordResetExpires = undefined;
+  user.passwordResetAttempts = undefined;
+};
+
+// Returns the user when the code is this email's current reset code, otherwise null.
+// A wrong code counts as an attempt (atomically, so parallel guesses all count)
+const findUserByResetCode = async (email, resetCode) => {
+  const user = await User.findOne({ email }).select(
+    "+passwordResetCode +passwordResetExpires +passwordResetAttempts",
+  );
+  if (
+    !user ||
+    !user.passwordResetCode ||
+    !(user.passwordResetExpires > Date.now())
+  ) {
+    return null;
+  }
+
+  const isMatch = crypto.timingSafeEqual(
+    Buffer.from(hashResetCode(resetCode), "hex"),
+    Buffer.from(user.passwordResetCode, "hex"),
+  );
+  if (isMatch) return user;
+
+  const updated = await User.findByIdAndUpdate(
+    user._id,
+    { $inc: { passwordResetAttempts: 1 } },
+    { returnDocument: "after" },
+  ).select("+passwordResetAttempts");
+  if (updated && updated.passwordResetAttempts >= MAX_RESET_CODE_ATTEMPTS) {
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $unset: {
+          passwordResetCode: 1,
+          passwordResetExpires: 1,
+          passwordResetAttempts: 1,
+        },
+      },
+    );
+  }
+  return null;
+};
+
 // @desc Forget password
 // @route POST /api/v1/auth/forgotpassword
 // @access Public
@@ -120,22 +178,18 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
   // 1- Get user by email
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
-    return next(
-      new ApiError(`There is no user with this email ${req.body.email}`, 404),
-    );
+    return res
+      .status(200)
+      .json({ status: "success", message: RESET_CODE_SENT_MESSAGE });
   }
   // 2- if user exists, Generate (hashed) random 6 digits number (OTP) and save it to DB
   const resetCode = crypto.randomInt(100000, 1000000).toString();
-  const hashedResetCode = crypto
-    .createHash("sha256")
-    .update(resetCode)
-    .digest("hex");
 
   // save hashed passwordResetCode to DB
-  user.passwordResetCode = hashedResetCode;
+  user.passwordResetCode = hashResetCode(resetCode);
   // Set expiration time for the reset code(10 min)
   user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-  user.passwordResetVerified = false;
+  user.passwordResetAttempts = 0;
 
   await user.save();
 
@@ -149,9 +203,7 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
       message,
     });
   } catch (err) {
-    user.passwordResetCode = undefined;
-    user.passwordResetExpires = undefined;
-    user.passwordResetVerified = undefined;
+    clearResetCode(user);
     await user.save();
     return next(
       new ApiError(
@@ -163,31 +215,18 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    message: "Reset code sent to email",
+    message: RESET_CODE_SENT_MESSAGE,
   });
 });
 
-// @desc Verify password reset code
+// @desc Verify password reset code (lets a client check the code before asking for the new password)
 // @route POST /api/v1/auth/verifyResetCode
 // @access Public
 export const verifyPassResetCode = asyncHandler(async (req, res, next) => {
-  // 1 - Get user based on the reset code
-  const hashedResetCode = crypto
-    .createHash("sha256")
-    .update(req.body.resetCode)
-    .digest("hex");
-
-  const user = await User.findOne({
-    passwordResetCode: hashedResetCode,
-    passwordResetExpires: { $gt: Date.now() },
-  });
+  const user = await findUserByResetCode(req.body.email, req.body.resetCode);
   if (!user) {
     return next(new ApiError("Reset code is invalid or has expired", 400));
   }
-
-  // 2- Reset code is valid
-  user.passwordResetVerified = true;
-  await user.save();
 
   res.status(200).json({
     status: "success",
@@ -195,31 +234,19 @@ export const verifyPassResetCode = asyncHandler(async (req, res, next) => {
 });
 
 // @desc Reset password
-// @route POST /api/v1/auth/resetpassword
+// @route PUT /api/v1/auth/resetpassword
 // @access Public
 export const resetPassword = asyncHandler(async (req, res, next) => {
-  // 1- Get user based on the email
-  const user = await User.findOne({
-    email: req.body.email,
-  }).select("+passwordResetVerified +passwordResetExpires");
+  // 1- The code is checked again here, so only whoever has it can set the password
+  const user = await findUserByResetCode(req.body.email, req.body.resetCode);
   if (!user) {
-    return next(
-      new ApiError(`There is no user with this email ${req.body.email}`, 404),
-    );
-  }
-  // 2- Check if the reset code is verified and still valid
-  if (
-    !user.passwordResetVerified ||
-    !(user.passwordResetExpires > Date.now())
-  ) {
-    return next(new ApiError("Reset code not verified", 400));
+    return next(new ApiError("Reset code is invalid or has expired", 400));
   }
 
+  // 2- Set the new password and use up the code
   user.password = req.body.newPassword;
   user.passwordChangedAt = Date.now(); // invalidate tokens issued before the reset
-  user.passwordResetCode = undefined;
-  user.passwordResetExpires = undefined;
-  user.passwordResetVerified = undefined;
+  clearResetCode(user);
   await user.save();
 
   // 3- If everything is ok > |Generate token

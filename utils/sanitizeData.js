@@ -4,6 +4,8 @@ export const SENSITIVE_USER_FIELDS = [
   "passwordChangedAt",
   "passwordResetCode",
   "passwordResetExpires",
+  "passwordResetAttempts",
+  // No longer written, but older user documents may still have it
   "passwordResetVerified",
 ];
 
