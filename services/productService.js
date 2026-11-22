@@ -1,6 +1,6 @@
 import sharp from "sharp";
 import asyncHandler from "express-async-handler";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 
 import { uploadMixOfImages } from "../middlewares/uploadImageMiddleware.js";
 
@@ -22,7 +22,7 @@ export const uploadProductImage = uploadMixOfImages([
 export const resizeProductImages = asyncHandler(async (req, res, next) => {
   // 1- image processing for imageCover
   if (req.files && req.files.imageCover) {
-    const imageCoverFileName = `product-${uuidv4()}-${Date.now()}-cover.jpeg`;
+    const imageCoverFileName = `product-${randomUUID()}-${Date.now()}-cover.jpeg`;
 
     await sharp(req.files.imageCover[0].buffer)
       .resize(2000, 1333)
@@ -38,7 +38,7 @@ export const resizeProductImages = asyncHandler(async (req, res, next) => {
     req.body.images = [];
     await Promise.all(
       req.files.images.map(async (img, index) => {
-        const imageName = `product-${uuidv4()}-${Date.now()}-${index + 1}.jpeg`;
+        const imageName = `product-${randomUUID()}-${Date.now()}-${index + 1}.jpeg`;
 
         await sharp(img.buffer)
           .resize(2000, 1333)

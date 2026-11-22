@@ -1,6 +1,6 @@
 import sharp from "sharp";
 import asyncHandler from "express-async-handler";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 
 import * as factory from "./handlersFactory.js";
@@ -16,7 +16,7 @@ export const uploadUserImage = uploadSingleImage("profileImage");
 
 // image processing
 export const resizeImage = asyncHandler(async (req, res, next) => {
-  const filename = `user-${uuidv4()}-${Date.now()}.jpeg`;
+  const filename = `user-${randomUUID()}-${Date.now()}.jpeg`;
 
   if (req.file) {
     await sharp(req.file.buffer)

@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 import asyncHandler from "express-async-handler";
 
 import * as factory from "./handlersFactory.js";
@@ -12,7 +12,7 @@ export const uploadCategoryImage = uploadSingleImage("image");
 // image processing
 export const resizeImage = asyncHandler(async (req, res, next) => {
   if (req.file) {
-    const filename = `category-${uuidv4()}-${Date.now()}.jpeg`;
+    const filename = `category-${randomUUID()}-${Date.now()}.jpeg`;
 
     await sharp(req.file.buffer)
       .resize(600, 600)
