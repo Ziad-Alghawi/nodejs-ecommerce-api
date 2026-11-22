@@ -202,7 +202,7 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
       subject: "Your password reset code (valid for 10 min)",
       message,
     });
-  } catch (err) {
+  } catch {
     clearResetCode(user);
     await user.save();
     return next(
