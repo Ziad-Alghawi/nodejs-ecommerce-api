@@ -1,12 +1,14 @@
 # Node.js E-Commerce API
 
+[![CI](https://github.com/Ziad-Alghawi/nodejs-ecommerce-api/actions/workflows/ci.yml/badge.svg)](https://github.com/Ziad-Alghawi/nodejs-ecommerce-api/actions/workflows/ci.yml)
+
 A REST API for an online shop with role-based access, a product catalog, cart, orders and Stripe payments.
 
 ![API requests and responses](docs/ecommerce-api.png)
 
 ## Features
 
-- JWT authentication with signup, login and password reset by email code
+- JWT authentication with signup, login and password reset by email code (tied to the email, used up after 5 wrong tries)
 - Role-based access for users, managers and admins
 - Products, categories, subcategories and brands with image upload and resizing
 - Reviews with automatic product ratings, one review per user and product
@@ -96,6 +98,15 @@ Then open <http://localhost:8000/api-docs>.
 - Health check: `GET /health`
 - Base path: `/api/v1`
 
+## Tests
+
+```bash
+npm test
+npm run lint
+```
+
+The tests send real HTTP requests to the app with Supertest and use an in-memory MongoDB, so they need no database or `.env`. They cover signup and login, protected routes, role checks, and the password reset flow (same answer for unknown emails, codes tied to one email, single use, expiry and the attempt limit). GitHub Actions runs lint and tests on every push, against a MongoDB service container.
+
 ## Project structure
 
 ```text
@@ -106,9 +117,11 @@ models/        Mongoose schemas
 postman/       Postman collection
 routes/        Route definitions
 services/      Business logic
+test/          API tests
 uploads/       Uploaded images and demo placeholders
 utils/         Validators, query features, email and seed data
-server.js      App entry point
+app.js         Express app: middleware and routes
+server.js      Entry point: database connection and HTTP server
 render.yaml    Render deployment
 ```
 
